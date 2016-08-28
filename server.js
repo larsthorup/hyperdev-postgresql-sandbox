@@ -3,6 +3,9 @@
 
 // init project
 var express = require('express');
+var pgp = require('pg-promise')();
+var db = pgp(process.env.DBCONNECTION);
+
 var app = express();
 
 // we've started you off with Express, 
@@ -24,6 +27,13 @@ app.get("/dreams", function (request, response) {
 app.post("/dreams", function (request, response) {
   dreams.push(request.query.dream);
   response.sendStatus(200);
+});
+
+db.query('select * from dream').then(function (data) {
+  console.log(data);
+  dreams = data.map(function (row) {
+    return row.title;
+  });
 });
 
 // Simple in-memory store for now
