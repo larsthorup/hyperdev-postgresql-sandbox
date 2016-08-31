@@ -4,6 +4,7 @@
 // init project
 var express = require('express');
 var pgp = require('pg-promise')();
+console.log('process.env.DBCONNECTION', process.env.DBCONNECTION)
 var db = pgp(process.env.DBCONNECTION);
 
 var app = express();
@@ -19,31 +20,35 @@ app.get("/", function (request, response) {
   response.sendFile(__dirname + '/views/index.html');
 });
 
-app.get("/dreams", function (request, response) {
-  response.send(dreams);
-});
+function onGetDreams (request, response) {
+  db.query('select * from dream').then(function (data) {
+    var dreams = data.map(function (row) {
+      return row.title;
+    });
+    response.send(dreams);
+  });
+}
+
+app.get("/dreams", onGetDreams);
+
+function onDreamPosted (request, response) {
+  var dream = request.query.dream;
+  db.query(`insert into dream (title) values ('${dream}')`);
+  response.sendStatus(200);
+}
 
 // could also use the POST body instead of query string: http://expressjs.com/en/api.html#req.body
-app.post("/dreams", function (request, response) {
-  dreams.push(request.query.dream);
-  response.sendStatus(200);
-});
-
-db.query('select * from dream').then(function (data) {
-  console.log(data);
-  dreams = data.map(function (row) {
-    return row.title;
-  });
-});
-
-// Simple in-memory store for now
-var dreams = [
-  "Find and count some sheep",
-  "Climb a really tall mountain",
-  "Wash the dishes"
-  ];
+app.post("/dreams", onDreamPosted);
 
 // listen for requests :)
 var listener = app.listen(process.env.PORT, function () {
   console.log('Your app is listening on port ' + listener.address().port);
 });
+
+function onDeleteDream (request, response) {
+  var dream = request.query.dream;
+  db.query(`delete from dream where title = '${dream}'`)
+  response.sendStatus(200);
+}
+
+app.delete("/dreams", onDeleteDream)

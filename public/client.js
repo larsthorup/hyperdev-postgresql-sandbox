@@ -7,20 +7,34 @@
 $(function() {
   console.log('hello world :o');
   
-  $.get('/dreams', function(dreams) {
-    dreams.forEach(function(dream) {
-      $('<li></li>').text(dream).appendTo('ul#dreams');
-    });
-  });
+  getDreams()
 
   $('form').submit(function(event) {
     event.preventDefault();
-    dream = $('input').val();
+    var dream = $('input').val();
     $.post('/dreams?' + $.param({dream: dream}), function() {
-      $('<li></li>').text(dream).appendTo('ul#dreams');
+      getDreams()
       $('input').val('');
       $('input').focus();
     });
   });
 
 });
+
+function getDreams() {
+   
+   $.get('/dreams', function(dreams) {
+    $('ul#dreams li').remove();
+    dreams.forEach(function(dream) {
+      $('<li></li>').text(dream).appendTo('ul#dreams').click(deleteDream);
+    });
+  }); 
+  
+}
+
+function deleteDream(ev) {
+  var dream = $(ev.target).text()
+  $.ajax('/dreams?' + $.param({dream: dream}), {method: 'DELETE', success: function () {
+    getDreams ()
+  }})
+}
