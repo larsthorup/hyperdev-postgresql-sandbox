@@ -18,6 +18,17 @@ On the front-end,
 - edit `client.js`, `style.css` and `index.html`
 - drag in `assets`, like images or music, to add them to your project
 
+Local Development
+-----------------
+
+    # Install Node.js from nodejs.org
+    # unzip the source of this project
+    cd hyperdev-postgresql-sandbox
+    npm install
+    set DBCONNECTION= # set db connection string
+    set PORT=8080 # or whatever
+    npm start
+    # open http://localhost:8642
 
 Made by Fog Creek
 -----------------
